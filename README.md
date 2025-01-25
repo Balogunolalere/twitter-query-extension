@@ -48,7 +48,7 @@ Convert natural language search requests into advanced Twitter search queries us
    - Open Twitter in new tab
    - Execute search automatically
 
-![Interface Preview]("screenshot/Screenshot from 2025-01-25 16-30-54.png")
+![Interface Preview](screenshot/Screenshot from 2025-01-25 16-30-54.png)
 
 ## Technical Details
 
