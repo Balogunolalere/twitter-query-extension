@@ -1,0 +1,33 @@
+{
+    "manifest_version": 2,
+    "name": "Twitter Query Generator",
+    "version": "1.0",
+    "description": "Convert natural language to Twitter advanced queries",
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "twitter-query-gen@example.com"
+        }
+    },
+    "icons": {
+      "48": "icons/Gemini_Generated_Image_82suyr82suyr82su-removebg-preview.png"
+    },
+    "permissions": [
+      "storage",
+      "tabs",
+      "https://*.googleapis.com/*",
+      "https://x.com/*"
+    ],
+    "browser_action": {
+      "default_icon": "icons/Gemini_Generated_Image_82suyr82suyr82su-removebg-preview.png",
+      "default_title": "Twitter Query Gen",
+      "default_popup": "popup.html"
+    },
+    "content_scripts": [{
+      "matches": ["https://x.com/*"],
+      "js": ["content.js"]
+    }],
+    "background": {
+      "scripts": ["background.js"]
+    },
+    "content_security_policy": "script-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com"
+}
