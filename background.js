@@ -49,14 +49,65 @@ Return ONLY the optimized search query without explanations.
 
 Input: {INPUT}`;
 
+// Add rate limiting
+const rateLimiter = {
+  tokens: 10,
+  lastRefill: Date.now(),
+  refillRate: 1000, // 1 token per second
+  maxTokens: 10,
+
+  async getToken() {
+    const now = Date.now();
+    const timePassed = now - this.lastRefill;
+    const refillTokens = Math.floor(timePassed / this.refillRate);
+    
+    if (refillTokens > 0) {
+      this.tokens = Math.min(this.maxTokens, this.tokens + refillTokens);
+      this.lastRefill = now;
+    }
+
+    if (this.tokens > 0) {
+      this.tokens--;
+      return true;
+    }
+    return false;
+  }
+};
+
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'generateQuery') {
-    generateQuery(request.input)
-      .then(response => sendResponse(response))
-      .catch(error => sendResponse({ error: error.message }));
-    return true;  // Will respond asynchronously
+    handleQueryGeneration(request, sendResponse);
+    return true;
+  } else if (request.action === 'generatePreview') {
+    handlePreviewGeneration(request, sendResponse);
+    return true;
   }
 });
+
+async function handleQueryGeneration(request, sendResponse) {
+  if (!await rateLimiter.getToken()) {
+    sendResponse({ error: 'Rate limit exceeded. Please try again in a few seconds.' });
+    return;
+  }
+  generateQuery(request.input)
+    .then(response => sendResponse(response))
+    .catch(error => sendResponse({ error: error.message }));
+}
+
+async function handlePreviewGeneration(request, sendResponse) {
+  if (!await rateLimiter.getToken()) {
+    sendResponse({ error: 'Rate limit exceeded' });
+    return;
+  }
+
+  try {
+    // Generate a simpler preview version
+    const preview = await generatePreview(request.input);
+    sendResponse({ preview });
+  } catch (error) {
+    sendResponse({ error: error.message });
+  }
+}
 
 async function generateQuery(input) {
   try {
@@ -95,4 +146,9 @@ async function generateQuery(input) {
     console.error('Query generation error:', error);
     throw new Error(`Failed to generate query: ${error.message}`);
   }
+}
+
+async function generatePreview(input) {
+  // Simplified version of query generation for previews
+  // ... implementation ...
 }

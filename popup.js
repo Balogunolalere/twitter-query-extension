@@ -1,3 +1,32 @@
+function showAlert(message, type = 'error') {
+  const alertContainer = document.createElement('div');
+  alertContainer.className = `custom-alert ${type}`;
+  
+  alertContainer.innerHTML = `
+    <div class="alert-content">
+      <span>${message}</span>
+      <button class="alert-close">×</button>
+    </div>
+  `;
+
+  document.body.appendChild(alertContainer);
+  setTimeout(() => alertContainer.classList.add('visible'), 10);
+
+  const closeBtn = alertContainer.querySelector('.alert-close');
+  closeBtn.addEventListener('click', () => {
+    alertContainer.classList.remove('visible');
+    setTimeout(() => alertContainer.remove(), 300);
+  });
+
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (document.body.contains(alertContainer)) {
+      alertContainer.classList.remove('visible');
+      setTimeout(() => alertContainer.remove(), 300);
+    }
+  }, 5000);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const input = document.getElementById('input');
   const generateBtn = document.getElementById('generate');
@@ -11,6 +40,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const saveApiKeyBtn = document.getElementById('saveApiKey');
   const mainContent = document.querySelector('.input-container');
   const exportBtn = document.getElementById('export');
+  const historyBtn = document.getElementById('historyBtn');
+  const templatesBtn = document.getElementById('templatesBtn');
+  const historyPanel = document.getElementById('historyPanel');
+  const templatesPanel = document.getElementById('templatesPanel');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsPanel = document.getElementById('settingsPanel');
   
   // Check for API key on load
   try {
@@ -35,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveApiKeyBtn.innerHTML = '<div class="loading"><div class="spinner"></div>Validating...</div>';
 
     if (!apiKey) {
-      alert('Please enter a valid API key');
+      showAlert('Please enter a valid API key');
       saveApiKeyBtn.disabled = false;
       saveApiKeyBtn.innerHTML = '<i class="fas fa-key"></i> Save API Key';
       return;
@@ -55,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       generateBtn.style.display = 'flex';
       resultContainer.style.display = 'none';
     } catch (error) {
-      alert(`Error: ${error.message}`);
+      showAlert(`Error: ${error.message}`);
     } finally {
       saveApiKeyBtn.disabled = false;
       saveApiKeyBtn.innerHTML = '<i class="fas fa-key"></i> Save API Key';
@@ -122,6 +157,16 @@ document.addEventListener('DOMContentLoaded', async () => {
           }).catch(console.error);
         }
       });
+
+      // Add to history after successful generation
+      if (response.query) {
+        await addToHistory({
+          query: response.query,
+          originalInput: query,
+          timestamp: new Date().toISOString()
+        });
+        loadQueryHistory(); // Refresh history display
+      }
 
     } catch (error) {
       console.error('Extension error:', error);
@@ -215,6 +260,56 @@ document.addEventListener('DOMContentLoaded', async () => {
       }, 2000);
     }
   });
+
+  historyBtn.addEventListener('click', () => {
+    historyPanel.classList.toggle('visible');
+    templatesPanel.classList.remove('visible');
+  });
+
+  templatesBtn.addEventListener('click', () => {
+    templatesPanel.classList.toggle('visible');
+    historyPanel.classList.remove('visible');
+  });
+
+  settingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.toggle('visible');
+    historyPanel.classList.remove('visible');
+    templatesPanel.classList.remove('visible');
+  });
+
+  // Add close button handlers
+  document.querySelectorAll('.close-panel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = btn.closest('.side-panel');
+      if (panel) {
+        panel.classList.remove('visible');
+      }
+    });
+  });
+
+  // Close panels when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.side-panel') && 
+        !e.target.closest('.toolbar-btn')) {
+      historyPanel.classList.remove('visible');
+      templatesPanel.classList.remove('visible');
+      settingsPanel.classList.remove('visible');
+    }
+  });
+
+  // Escape key to close panels
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      historyPanel.classList.remove('visible');
+      templatesPanel.classList.remove('visible');
+      settingsPanel.classList.remove('visible');
+    }
+  });
+
+  // Load history and templates on startup
+  loadQueryHistory();
+  loadQueryTemplates();
+  loadSettings();
 });
 
 async function validateApiKey(apiKey) {
@@ -236,3 +331,199 @@ async function validateApiKey(apiKey) {
     return false;
   }
 }
+
+async function addToHistory(entry) {
+  const { queryHistory = [] } = await browser.storage.local.get('queryHistory');
+  queryHistory.unshift(entry);
+  // Keep last 50 queries
+  queryHistory.splice(50);
+  await browser.storage.local.set({ queryHistory });
+}
+
+async function loadQueryHistory() {
+  const historyList = document.getElementById('historyList');
+  const { queryHistory = [] } = await browser.storage.local.get('queryHistory');
+  
+  historyList.innerHTML = queryHistory.map(entry => `
+    <div class="history-item">
+      <div class="history-content">
+        <div class="history-query">${entry.query}</div>
+        <div class="history-meta">
+          <span>${new Date(entry.timestamp).toLocaleString()}</span>
+          <span class="history-original">${entry.originalInput}</span>
+        </div>
+      </div>
+      <div class="history-actions">
+        <button class="icon-button use-query" title="Use Query">
+          <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="icon-button save-template" title="Save as Template">
+          <i class="fas fa-bookmark"></i>
+        </button>
+        <button class="icon-button delete-history" title="Delete from History">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  // Add event listeners to history items
+  historyList.querySelectorAll('.use-query').forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+      input.value = queryHistory[index].originalInput;
+      resultDiv.textContent = queryHistory[index].query;
+      resultContainer.style.display = 'block';
+      resultContainer.classList.add('visible');
+    });
+  });
+
+  // Add template save functionality
+  historyList.querySelectorAll('.save-template').forEach((btn, index) => {
+    btn.addEventListener('click', async () => {
+      const { queryHistory = [] } = await browser.storage.local.get('queryHistory');
+      const entry = queryHistory[index];
+      
+      // Create template with name
+      const templateName = prompt('Enter a name for this template:');
+      if (templateName) {
+        const { templates = [] } = await browser.storage.local.get('templates');
+        templates.push({
+          name: templateName,
+          query: entry.query,
+          originalInput: entry.originalInput,
+          created: new Date().toISOString()
+        });
+        await browser.storage.local.set({ templates });
+        loadQueryTemplates();
+      }
+    });
+  });
+
+  // Add delete functionality
+  historyList.querySelectorAll('.delete-history').forEach((btn, index) => {
+    btn.addEventListener('click', async () => {
+      if (confirm('Delete this item from history?')) {
+        const { queryHistory = [] } = await browser.storage.local.get('queryHistory');
+        queryHistory.splice(index, 1);
+        await browser.storage.local.set({ queryHistory });
+        loadQueryHistory(); // Refresh the history display
+      }
+    });
+  });
+}
+
+async function loadQueryTemplates() {
+  const templatesList = document.getElementById('templatesList');
+  const { templates = [] } = await browser.storage.local.get('templates');
+  
+  templatesList.innerHTML = templates.map(template => `
+    <div class="template-item">
+      <div class="template-content">
+        <div class="template-name">${template.name}</div>
+        <div class="template-query">${template.query}</div>
+        <div class="template-meta">
+          <span>${new Date(template.created).toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="template-actions">
+        <button class="icon-button use-template" title="Use Template">
+          <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="icon-button delete-template" title="Delete Template">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  // Add template action listeners
+  templatesList.querySelectorAll('.use-template').forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+      input.value = templates[index].originalInput;
+      resultDiv.textContent = templates[index].query;
+      resultContainer.style.display = 'block';
+      resultContainer.classList.add('visible');
+      templatesPanel.classList.remove('visible');
+    });
+  });
+
+  templatesList.querySelectorAll('.delete-template').forEach((btn, index) => {
+    btn.addEventListener('click', async () => {
+      if (confirm('Delete this template?')) {
+        templates.splice(index, 1);
+        await browser.storage.local.set({ templates });
+        loadQueryTemplates();
+      }
+    });
+  });
+}
+
+// Add real-time preview functionality
+let previewTimeout;
+input.addEventListener('input', () => {
+  // ...existing character count code...
+
+  // Add preview functionality
+  clearTimeout(previewTimeout);
+  previewTimeout = setTimeout(async () => {
+    const query = input.value.trim();
+    if (query.length > 3) { // Only preview if more than 3 characters
+      try {
+        const response = await browser.runtime.sendMessage({
+          action: 'generatePreview',
+          input: query
+        });
+        
+        if (response.preview) {
+          const previewDiv = document.getElementById('queryPreview');
+          previewDiv.textContent = response.preview;
+          previewDiv.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Preview generation error:', error);
+      }
+    }
+  }, 500); // Delay preview by 500ms to avoid too many API calls
+});
+
+// Load and save settings
+async function loadSettings() {
+  const { settings = defaultSettings } = await browser.storage.local.get('settings');
+  updateSettingsUI(settings);
+}
+
+async function saveSettings(newSettings) {
+  await browser.storage.local.set({ settings: newSettings });
+  updateSettingsUI(newSettings);
+}
+
+const defaultSettings = {
+  maxHistory: 50,
+  autoOpenTwitter: true,
+  theme: 'system',
+  previewEnabled: true
+};
+
+// Update settings UI based on current settings
+function updateSettingsUI(settings) {
+  document.getElementById('maxHistory').value = settings.maxHistory;
+  document.getElementById('autoOpenTwitter').checked = settings.autoOpenTwitter;
+  document.getElementById('themeSelect').value = settings.theme;
+  document.getElementById('previewEnabled').checked = settings.previewEnabled;
+}
+
+// Settings form submit handler
+document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const newSettings = {
+    maxHistory: parseInt(document.getElementById('maxHistory').value),
+    autoOpenTwitter: document.getElementById('autoOpenTwitter').checked,
+    theme: document.getElementById('themeSelect').value,
+    previewEnabled: document.getElementById('previewEnabled').checked
+  };
+  await saveSettings(newSettings);
+  settingsPanel.classList.remove('visible');
+});
+
+// Load settings on startup
+loadSettings();

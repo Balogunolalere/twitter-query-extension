@@ -319,6 +319,377 @@
       .api-key-link:hover {
         text-decoration: underline;
       }
+
+      /* Add these new styles */
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      .toolbar-btn {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 8px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+      }
+
+      .toolbar-btn:hover {
+        background: var(--surface);
+        transform: none;
+        box-shadow: none;
+      }
+
+      .side-panel {
+        position: fixed;
+        right: -350px; /* Increased width */
+        top: 0;
+        width: 350px;
+        height: 100vh;
+        background: var(--surface);
+        border-left: 1px solid var(--border);
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+      }
+
+      .side-panel.visible {
+        right: 0;
+      }
+
+      .panel-header {
+        position: sticky;
+        top: 0;
+        padding: 20px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1;
+      }
+
+      .panel-header h3 {
+        margin: 0;
+        font-size: 16px;
+        color: var(--text);
+      }
+
+      .close-panel {
+        background: transparent;
+        border: none;
+        color: var(--text);
+        font-size: 24px;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+      }
+
+      .close-panel:hover {
+        background: rgba(29, 161, 242, 0.1);
+      }
+
+      .panel-content {
+        padding: 15px;
+      }
+
+      .history-item {
+        padding: 15px;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.2s ease;
+      }
+
+      .history-item:hover {
+        background: rgba(29, 161, 242, 0.05);
+      }
+
+      .history-content {
+        margin-bottom: 10px;
+      }
+
+      .history-query {
+        font-family: 'SF Mono', 'Consolas', monospace;
+        font-size: 13px;
+        color: var(--text);
+        margin-bottom: 8px;
+        word-break: break-all;
+      }
+
+      .history-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--border);
+      }
+
+      .history-original {
+        color: var(--primary);
+        font-style: italic;
+      }
+
+      .history-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .icon-button {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        transition: all 0.2s ease;
+      }
+
+      .icon-button:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+      }
+
+      /* Overlay when panel is open */
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        z-index: 999;
+      }
+
+      .overlay.visible {
+        display: block;
+      }
+
+      /* Update toolbar styles */
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin: 15px 0;
+        padding: 0 15px;
+      }
+
+      .toolbar-btn {
+        flex: 1;
+        justify-content: center;
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        transition: all 0.2s ease;
+      }
+
+      .toolbar-btn:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        transform: translateY(-1px);
+      }
+
+      .toolbar-btn i {
+        margin-right: 8px;
+      }
+
+      .template-item {
+        padding: 15px;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.2s ease;
+      }
+
+      .template-item:hover {
+        background: rgba(29, 161, 242, 0.05);
+      }
+
+      .template-name {
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 5px;
+      }
+
+      .template-query {
+        font-family: 'SF Mono', 'Consolas', monospace;
+        font-size: 12px;
+        color: var(--text);
+        margin-bottom: 8px;
+        word-break: break-all;
+      }
+
+      .template-meta {
+        font-size: 11px;
+        color: var(--border);
+      }
+
+      .template-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .settings-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .settings-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .settings-group label {
+        font-size: 14px;
+        color: var(--text);
+      }
+
+      .settings-input {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      .settings-save-btn {
+        margin-top: 20px;
+        width: 100%;
+      }
+
+      .settings-group input[type="checkbox"] {
+        margin-right: 8px;
+      }
+
+      .delete-history {
+        color: var(--error);
+        border-color: var(--error);
+      }
+
+      .delete-history:hover {
+        background: var(--error);
+        border-color: var(--error);
+        color: white;
+      }
+
+      /* Add confirmation animation */
+      .delete-history.confirming {
+        animation: shake 0.4s linear;
+      }
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(3px); }
+        75% { transform: translateX(-3px); }
+      }
+
+      .custom-alert {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        transform: translateY(-100%);
+        background: var(--surface);
+        border-left: 4px solid var(--error);
+        border-radius: 8px;
+        padding: 12px;
+        z-index: 2000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .custom-alert.visible {
+        transform: translateY(0);
+      }
+
+      .alert-content {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .alert-content span {
+        flex: 1;
+        padding-top: 2px;
+      }
+
+      .alert-close {
+        padding: 4px;
+        font-size: 20px;
+        line-height: 1;
+        border: none;
+        background: transparent;
+        color: var(--text);
+        opacity: 0.7;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .alert-close:hover {
+        opacity: 1;
+      }
+
+      .custom-alert.success {
+        border-left-color: var(--success);
+      }
+
+      .custom-alert {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100%);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 15px;
+        z-index: 2000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 200px;
+        max-width: 300px;  /* Reduced max-width */
+        width: 90%;
+      }
+
+      .alert-content {
+        display: flex;
+        align-items: flex-start;  /* Changed from center to allow text wrapping */
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 13px;  /* Reduced font size */
+        color: var(--text);
+        line-height: 1.4;  /* Added line height for better readability */
+      }
+
+      .alert-content span {
+        flex: 1;
+        word-break: break-word;  /* Allow word breaking */
+        margin-top: 2px;  /* Align with close button */
+      }
+
+      .alert-close {
+        background: transparent;
+        border: none;
+        color: var(--text);
+        font-size: 18px;  /* Reduced size */
+        padding: 2px 6px;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        flex-shrink: 0;  /* Prevent button from shrinking */
+      }
     </style>
   </head>
   <body>
@@ -381,6 +752,85 @@
         <div id="result"></div>
       </div>
     </div>
+
+    <div class="toolbar">
+      <button id="historyBtn" class="toolbar-btn">
+        <i class="fas fa-history"></i>
+        History
+      </button>
+      <button id="templatesBtn" class="toolbar-btn">
+        <i class="fas fa-bookmark"></i>
+        Templates
+      </button>
+      <button id="settingsBtn" class="toolbar-btn">
+        <i class="fas fa-cog"></i>
+        Settings
+      </button>
+    </div>
+
+    <div id="historyPanel" class="side-panel">
+      <div class="panel-header">
+        <h3>Query History</h3>
+        <button class="close-panel">×</button>
+      </div>
+      <div id="historyList" class="panel-content"></div>
+    </div>
+
+    <div id="templatesPanel" class="side-panel">
+      <div class="panel-header">
+        <h3>Saved Templates</h3>
+        <button class="close-panel">×</button>
+      </div>
+      <div id="templatesList" class="panel-content"></div>
+    </div>
+
+    <div id="settingsPanel" class="side-panel">
+      <div class="panel-header">
+        <h3>Settings</h3>
+        <button class="close-panel">×</button>
+      </div>
+      <div class="panel-content">
+        <form id="settingsForm" class="settings-form">
+          <div class="settings-group">
+            <label for="maxHistory">Maximum History Items</label>
+            <input type="number" id="maxHistory" min="10" max="100" class="settings-input">
+          </div>
+          
+          <div class="settings-group">
+            <label for="autoOpenTwitter">
+              <input type="checkbox" id="autoOpenTwitter">
+              Automatically open Twitter search
+            </label>
+          </div>
+
+          <div class="settings-group">
+            <label for="themeSelect">Theme</label>
+            <select id="themeSelect" class="settings-input">
+              <option value="system">System Default</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+
+          <div class="settings-group">
+            <label for="previewEnabled">
+              <input type="checkbox" id="previewEnabled">
+              Enable real-time preview
+            </label>
+          </div>
+
+          <button type="submit" class="settings-save-btn">
+            <i class="fas fa-save"></i>
+            Save Settings
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="queryPreview" class="preview-container"></div>
+
+    <div class="overlay"></div>
+
     <script src="popup.js"></script>
   </body>
 </html>
