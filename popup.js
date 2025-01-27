@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const apiKeyInput = document.getElementById('apiKeyInput');
   const saveApiKeyBtn = document.getElementById('saveApiKey');
   const mainContent = document.querySelector('.input-container');
+  const exportBtn = document.getElementById('export');
   
   // Check for API key on load
   try {
@@ -153,6 +154,65 @@ document.addEventListener('DOMContentLoaded', async () => {
       copyBtn.innerHTML = '<i class="fas fa-times"></i> Failed';
       copyBtn.style.background = 'var(--error)';
       setTimeout(() => copyBtn.innerHTML = originalContent, 2000);
+    }
+  });
+
+  exportBtn.addEventListener('click', async () => {
+    try {
+      const query = resultDiv.textContent;
+      if (!query) return;
+
+      exportBtn.disabled = true;
+      exportBtn.innerHTML = '<div class="loading"><div class="spinner"></div>Collecting...</div>';
+
+      // Get active tab with Twitter search results
+      const tabs = await browser.tabs.query({active: true, currentWindow: true});
+      const tab = tabs[0];
+
+      // Collect tweets
+      const response = await browser.tabs.sendMessage(tab.id, { 
+        action: 'collectTweets'
+      });
+
+      if (response.tweets && response.tweets.length > 0) {
+        // Prepare the data for export
+        const exportData = {
+          query,
+          timestamp: new Date().toISOString(),
+          tweets: response.tweets
+        };
+
+        // Create and download the file
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `twitter-search-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Show success
+        exportBtn.innerHTML = '<i class="fas fa-check"></i> Exported!';
+        exportBtn.style.background = 'var(--success)';
+        exportBtn.style.borderColor = 'var(--success)';
+        exportBtn.style.color = 'white';
+      } else {
+        throw new Error('No tweets found');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      exportBtn.innerHTML = '<i class="fas fa-times"></i> Failed';
+      exportBtn.style.background = 'var(--error)';
+    } finally {
+      setTimeout(() => {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = '<i class="fas fa-download"></i> Export Results';
+        exportBtn.style.background = 'transparent';
+        exportBtn.style.borderColor = 'var(--primary)';
+        exportBtn.style.color = 'var(--primary)';
+      }, 2000);
     }
   });
 });

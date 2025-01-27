@@ -180,6 +180,11 @@
         color: var(--primary);
       }
 
+      .button-group {
+        display: flex;
+        gap: 8px;
+      }
+
       .copy-button {
         padding: 8px 16px;
         font-size: 13px;
@@ -194,6 +199,14 @@
 
       .copy-button i {
         font-size: 14px;
+      }
+
+      .export-button {
+        padding: 8px 16px;
+        font-size: 13px;
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
       }
 
       #result {
@@ -354,10 +367,16 @@
       <div class="result-container">
         <div class="result-header">
           <span>Generated Query</span>
-          <button class="copy-button" id="copy">
-            <i class="fas fa-copy"></i>
-            Copy
-          </button>
+          <div class="button-group">
+            <button class="copy-button" id="copy">
+              <i class="fas fa-copy"></i>
+              Copy
+            </button>
+            <button class="export-button" id="export">
+              <i class="fas fa-download"></i>
+              Export Results
+            </button>
+          </div>
         </div>
         <div id="result"></div>
       </div>
